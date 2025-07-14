@@ -1,6 +1,5 @@
 package me.hd.jadx.plugins.action
 
-import com.highcapable.kavaref.extension.*
 import jadx.api.JavaClass
 import jadx.api.JavaField
 import jadx.api.JavaMethod
@@ -20,10 +19,9 @@ object CodeAction {
 
 	private fun getClassCode(javaNode: JavaClass): String {
 		val node = javaNode.classNode
-		val className = node.name
 		val classRawName = node.rawName
 		return """
-			val ${className}Clazz = "$classRawName".toClass()
+			"$classRawName".toClass()
 		"""
 	}
 
@@ -34,13 +32,13 @@ object CodeAction {
 		val argTypes = node.argTypes.map(::getKavaRefType)
 		return if (node.isConstructor) {
 			"""
-				resolve().firstConstructor {
+				firstConstructor {
 					${if (argTypes.isEmpty()) "emptyParameters()" else "parameters(${argTypes.joinToString(", ")})"}
 				}
 			""".trimIndent()
 		} else {
 			"""
-				resolve().firstMethod {
+				firstMethod {
 					returnType = $returnType
 					name = "$name"
 					${if (argTypes.isEmpty()) "emptyParameters()" else "parameters(${argTypes.joinToString(", ")})"}
@@ -54,59 +52,67 @@ object CodeAction {
 		val type = getKavaRefType(node.type)
 		val name = node.name
 		return """
-			val field = resolve().firstField {
+			firstField {
 				type = $type
 				name = "$name"
 			}.get()
 		""".trimIndent()
 	}
 
-	private fun getPrimitiveType(type: ArgType): String {
-		return when (val name = type.primitiveType) {
-			PrimitiveType.BOOLEAN -> "JBoolean.TYPE"
-			PrimitiveType.CHAR -> "JCharacter.TYPE"
-			PrimitiveType.BYTE -> "JByte.TYPE"
-			PrimitiveType.SHORT -> "JShort.TYPE"
-			PrimitiveType.INT -> "JInteger.TYPE"
-			PrimitiveType.FLOAT -> "JFloat.TYPE"
-			PrimitiveType.LONG -> "JLong.TYPE"
-			PrimitiveType.DOUBLE -> "JDouble.TYPE"
-			PrimitiveType.VOID -> "JVoid.TYPE"
-			else -> "\"$name\""
-		}
-	}
-
-	private fun getObjectType(type: ArgType): String {
-		return when (val name = type.`object`) {
-			JBoolean::class.java.name -> "JBoolean::class"
-			JCharacter::class.java.name -> "JCharacter::class"
-			JByte::class.java.name -> "JByte::class"
-			JShort::class.java.name -> "JShort::class"
-			JInteger::class.java.name -> "JInteger::class"
-			JFloat::class.java.name -> "JFloat::class"
-			JLong::class.java.name -> "JLong::class"
-			JDouble::class.java.name -> "JDouble::class"
-			JVoid::class.java.name -> "JVoid::class"
-			Any::class.java.name -> "Any::class"
-			String::class.java.name -> "String::class"
-			CharSequence::class.java.name -> "CharSequence::class"
-			else -> "\"$name\""
-		}
-	}
-
 	private fun getKavaRefType(type: ArgType): String {
 		return when {
-			type.isPrimitive -> getPrimitiveType(type)
-			type.isObject -> getObjectType(type)
-			type.isArray -> {
-				val dimension = type.arrayDimension
-				val rootElement = type.arrayRootElement
-				val rootType = when {
-					rootElement.isPrimitive -> getPrimitiveType(rootElement)
-					rootElement.isObject -> getObjectType(rootElement)
-					else -> "ErrorType"
+			type.isPrimitive -> when (type) {
+				ArgType.BOOLEAN -> "Boolean::class"
+				ArgType.CHAR -> "Char::class"
+				ArgType.BYTE -> "Byte::class"
+				ArgType.SHORT -> "Short::class"
+				ArgType.INT -> "Int::class"
+				ArgType.FLOAT -> "Float::class"
+				ArgType.LONG -> "Long::class"
+				ArgType.DOUBLE -> "Double::class"
+				ArgType.VOID -> "Void.TYPE"
+				else -> "\"$type\""
+			}
+
+			type.isObject -> {
+				when {
+					type.isGeneric -> getKavaRefType(ArgType.`object`(type.`object`))
+					type.isGenericType -> "Any::class"
+					else -> when (type) {
+						PrimitiveType.BOOLEAN.boxType -> "JBoolean::class"
+						PrimitiveType.CHAR.boxType -> "JCharacter::class"
+						PrimitiveType.BYTE.boxType -> "JByte::class"
+						PrimitiveType.SHORT.boxType -> "JShort::class"
+						PrimitiveType.INT.boxType -> "JInteger::class"
+						PrimitiveType.FLOAT.boxType -> "JFloat::class"
+						PrimitiveType.LONG.boxType -> "JLong::class"
+						PrimitiveType.DOUBLE.boxType -> "JDouble::class"
+						PrimitiveType.VOID.boxType -> "JVoid::class"
+						ArgType.OBJECT -> "Any::class"
+						ArgType.CLASS -> "Class::class"
+						ArgType.STRING -> "String::class"
+						ArgType.ENUM -> "Enum::class"
+						ArgType.THROWABLE -> "Throwable::class"
+						ArgType.ERROR -> "Error::class"
+						ArgType.EXCEPTION -> "Exception::class"
+						ArgType.RUNTIME_EXCEPTION -> "RuntimeException::class"
+						ArgType.`object`(List::class.java.name) -> "List::class"
+						ArgType.`object`(Map::class.java.name) -> "Map::class"
+						else -> "\"$type\""
+					}
 				}
-				if (dimension > 0) "Array<".repeat(dimension) + rootType + ">".repeat(dimension) else rootType
+			}
+
+			type.isArray -> when (type.arrayElement) {
+				ArgType.BOOLEAN -> "BooleanArray::class"
+				ArgType.CHAR -> "CharArray::class"
+				ArgType.BYTE -> "ByteArray::class"
+				ArgType.SHORT -> "ShortArray::class"
+				ArgType.INT -> "IntArray::class"
+				ArgType.FLOAT -> "FloatArray::class"
+				ArgType.LONG -> "LongArray::class"
+				ArgType.DOUBLE -> "DoubleArray::class"
+				else -> "ArrayClass(${getKavaRefType(type.arrayElement)})"
 			}
 
 			else -> "ErrorType"
