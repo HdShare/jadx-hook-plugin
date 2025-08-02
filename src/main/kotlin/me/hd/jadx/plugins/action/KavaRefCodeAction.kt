@@ -7,8 +7,8 @@ import jadx.api.JavaNode
 import jadx.core.dex.instructions.args.ArgType
 import jadx.core.dex.instructions.args.PrimitiveType
 
-object CodeAction {
-	fun getHookCode(javaNode: JavaNode?): String {
+object KavaRefCodeAction {
+	fun getCode(javaNode: JavaNode?): String {
 		return when (javaNode) {
 			is JavaClass -> getClassCode(javaNode)
 			is JavaMethod -> getMethodCode(javaNode)

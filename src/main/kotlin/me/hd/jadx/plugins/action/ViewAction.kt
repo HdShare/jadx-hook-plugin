@@ -8,7 +8,7 @@ object ViewAction {
 		val guiContext = context.guiContext ?: return
 		val decompiler = context.decompiler ?: return
 		guiContext.addPopupMenuAction(
-			"复制为 Hook 片段",
+			"复制为 KavaRef 片段",
 			{ nodeRef ->
 				when (nodeRef?.annType) {
 					ICodeAnnotation.AnnType.CLASS,
@@ -21,7 +21,7 @@ object ViewAction {
 			null,
 			{ nodeRef ->
 				val node = decompiler.getJavaNodeByRef(nodeRef)
-				val code = CodeAction.getHookCode(node)
+				val code = KavaRefCodeAction.getCode(node)
 				guiContext.copyToClipboard(code)
 			}
 		)
