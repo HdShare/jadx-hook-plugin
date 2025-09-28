@@ -1,14 +1,34 @@
 package me.hd.jadx.plugins.action
 
-import jadx.api.JavaClass
-import jadx.api.JavaField
-import jadx.api.JavaMethod
-import jadx.api.JavaNode
+import jadx.api.*
+import jadx.api.metadata.ICodeAnnotation
+import jadx.api.plugins.gui.JadxGuiContext
 import jadx.core.dex.instructions.args.ArgType
 import jadx.core.dex.instructions.args.PrimitiveType
 
 object KavaRefCodeAction {
-	fun getCode(javaNode: JavaNode?): String {
+	fun addMenu(guiContext: JadxGuiContext, decompiler: JadxDecompiler) {
+		guiContext.addPopupMenuAction(
+			"复制为 KavaRef 片段",
+			{ nodeRef ->
+				when (nodeRef?.annType) {
+					ICodeAnnotation.AnnType.CLASS,
+					ICodeAnnotation.AnnType.METHOD,
+					ICodeAnnotation.AnnType.FIELD -> true
+
+					else -> false
+				}
+			},
+			null,
+			{ nodeRef ->
+				val node = decompiler.getJavaNodeByRef(nodeRef)
+				val code = getCode(node)
+				guiContext.copyToClipboard(code)
+			}
+		)
+	}
+
+	private fun getCode(javaNode: JavaNode?): String {
 		return when (javaNode) {
 			is JavaClass -> getClassCode(javaNode)
 			is JavaMethod -> getMethodCode(javaNode)
@@ -19,9 +39,9 @@ object KavaRefCodeAction {
 
 	private fun getClassCode(javaNode: JavaClass): String {
 		val node = javaNode.classNode
-		val classRawName = node.rawName
+		val rawName = node.rawName
 		return """
-			"$classRawName".toClass()
+			"$rawName".toClass()
 		"""
 	}
 
