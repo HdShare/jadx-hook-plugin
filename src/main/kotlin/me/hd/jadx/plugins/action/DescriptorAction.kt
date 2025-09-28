@@ -5,7 +5,7 @@ import jadx.api.metadata.ICodeAnnotation
 import jadx.api.plugins.gui.JadxGuiContext
 
 object DescriptorAction {
-	fun addMenu(guiContext: JadxGuiContext, decompiler: JadxDecompiler) {
+	fun addPopupMenu(guiContext: JadxGuiContext, decompiler: JadxDecompiler) {
 		guiContext.addPopupMenuAction(
 			"复制为 Jvm 类型签名",
 			{ nodeRef ->

@@ -7,7 +7,7 @@ import jadx.core.dex.instructions.args.ArgType
 import jadx.core.dex.instructions.args.PrimitiveType
 
 object KavaRefCodeAction {
-	fun addMenu(guiContext: JadxGuiContext, decompiler: JadxDecompiler) {
+	fun addPopupMenu(guiContext: JadxGuiContext, decompiler: JadxDecompiler) {
 		guiContext.addPopupMenuAction(
 			"复制为 KavaRef 片段",
 			{ nodeRef ->

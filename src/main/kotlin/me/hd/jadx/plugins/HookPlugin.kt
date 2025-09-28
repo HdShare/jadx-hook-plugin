@@ -21,7 +21,7 @@ class HookPlugin : JadxPlugin {
 	override fun init(context: JadxPluginContext) {
 		val options = HookPluginOptions().apply { context.registerOptions(this) }
 		if (options.isEnabled) {
-			ViewAction.addPopupMenu(context)
+			ViewAction.addMenu(context)
 		}
 	}
 }

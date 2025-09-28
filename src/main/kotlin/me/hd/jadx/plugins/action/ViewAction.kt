@@ -1,12 +1,18 @@
 package me.hd.jadx.plugins.action
 
+import jadx.api.JadxDecompiler
 import jadx.api.plugins.JadxPluginContext
+import jadx.api.plugins.gui.JadxGuiContext
 
 object ViewAction {
-	fun addPopupMenu(context: JadxPluginContext) {
+	fun addMenu(context: JadxPluginContext) {
 		val guiContext = context.guiContext ?: return
 		val decompiler = context.decompiler ?: return
-		DescriptorAction.addMenu(guiContext, decompiler)
-		KavaRefCodeAction.addMenu(guiContext, decompiler)
+		addPopupMenu(guiContext, decompiler)
+	}
+
+	private fun addPopupMenu(guiContext: JadxGuiContext, decompiler: JadxDecompiler) {
+		DescriptorAction.addPopupMenu(guiContext, decompiler)
+		KavaRefCodeAction.addPopupMenu(guiContext, decompiler)
 	}
 }
