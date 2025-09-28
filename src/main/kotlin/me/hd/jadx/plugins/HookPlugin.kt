@@ -4,7 +4,9 @@ import jadx.api.plugins.JadxPlugin
 import jadx.api.plugins.JadxPluginContext
 import jadx.api.plugins.JadxPluginInfo
 import jadx.api.plugins.JadxPluginInfoBuilder
-import me.hd.jadx.plugins.action.ViewAction
+import me.hd.jadx.plugins.action.DescriptorAction
+import me.hd.jadx.plugins.action.DexKitSearchAction
+import me.hd.jadx.plugins.action.KavaRefCodeAction
 
 class HookPlugin : JadxPlugin {
 	companion object {
@@ -20,8 +22,12 @@ class HookPlugin : JadxPlugin {
 
 	override fun init(context: JadxPluginContext) {
 		val options = HookPluginOptions().apply { context.registerOptions(this) }
+		val guiContext = context.guiContext ?: return
+		val decompiler = context.decompiler ?: return
 		if (options.isEnabled) {
-			ViewAction.addMenu(context)
+			DescriptorAction.addPopupMenu(guiContext, decompiler)
+			KavaRefCodeAction.addPopupMenu(guiContext, decompiler)
+			DexKitSearchAction.addMenuAction(guiContext, decompiler)
 		}
 	}
 }
