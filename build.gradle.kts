@@ -1,7 +1,7 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 
 plugins {
-	kotlin("jvm") version "2.0.0"
+	kotlin("jvm") version "2.2.21"
 	id("com.github.johnrengelman.shadow") version "8.1.1"
 }
 
@@ -18,10 +18,10 @@ repositories {
 }
 
 dependencies {
-	compileOnly("io.github.skylot:jadx-core:1.5.2")
+	compileOnly("io.github.skylot:jadx-core:1.5.3")
 	implementation("com.highcapable.kavaref:kavaref-core:1.0.2")
 	implementation("com.highcapable.kavaref:kavaref-extension:1.0.1")
-	implementation("org.slf4j:slf4j-api:2.0.9")
+	implementation("org.slf4j:slf4j-api:2.0.17")
 }
 
 tasks {
