@@ -91,7 +91,7 @@ object KavaRefCodeAction {
 				ArgType.LONG -> "Long::class"
 				ArgType.DOUBLE -> "Double::class"
 				ArgType.VOID -> "Void.TYPE"
-				else -> "\"$type\""
+				else -> throw IllegalArgumentException("Unknown primitive type: $type")
 			}
 
 			type.isObject -> {
@@ -135,7 +135,7 @@ object KavaRefCodeAction {
 				else -> "ArrayClass(${getKavaRefType(type.arrayElement)})"
 			}
 
-			else -> "ErrorType"
+			else -> throw IllegalArgumentException("Unsupported type: $type")
 		}
 	}
 }

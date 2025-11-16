@@ -3,6 +3,7 @@ package me.hd.jadx.plugins.action
 import jadx.api.*
 import jadx.api.metadata.ICodeAnnotation
 import jadx.api.plugins.gui.JadxGuiContext
+import jadx.core.dex.instructions.args.ArgType
 
 object DescriptorAction {
 	fun addPopupMenu(guiContext: JadxGuiContext, decompiler: JadxDecompiler) {
@@ -38,7 +39,7 @@ object DescriptorAction {
 	private fun getClassDesc(javaNode: JavaClass): String {
 		val node = javaNode.classNode
 		val rawName = node.rawName
-		return getTypeDesc(rawName)
+		return getClassNameDesc(rawName)
 	}
 
 	private fun getMethodDesc(javaNode: JavaMethod): String {
@@ -49,25 +50,25 @@ object DescriptorAction {
 		val argTypes = node.argTypes
 		return if (node.isConstructor) {
 			buildString {
-				append(getTypeDesc(classRawName))
+				append(getClassNameDesc(classRawName))
 				append("->")
 				append("<init>")
 				append(buildString {
 					append("(")
-					append(argTypes.joinToString("") { type -> getTypeDesc(type.toString()) })
+					append(argTypes.joinToString("") { type -> getTypeDesc(type) })
 					append(")V")
 				})
 			}
 		} else {
 			buildString {
-				append(getTypeDesc(classRawName))
+				append(getClassNameDesc(classRawName))
 				append("->")
 				append(name)
 				append(buildString {
 					append("(")
-					append(argTypes.joinToString("") { type -> getTypeDesc(type.toString()) })
+					append(argTypes.joinToString("") { type -> getTypeDesc(type) })
 					append(")")
-					append(getTypeDesc(returnType.toString()))
+					append(getTypeDesc(returnType))
 				})
 			}
 		}
@@ -79,27 +80,44 @@ object DescriptorAction {
 		val name = node.name
 		val type = node.type
 		return buildString {
-			append(getTypeDesc(classRawName))
+			append(getClassNameDesc(classRawName))
 			append("->")
 			append(name)
 			append(":")
-			append(getTypeDesc(type.toString()))
+			append(getTypeDesc(type))
 		}
 	}
 
-	private fun getTypeDesc(name: String): String {
-		if (name.endsWith("[]")) return "[" + getTypeDesc(name.substring(0, name.length - 2))
-		val primitiveMap = mapOf(
-			"boolean" to "Z",
-			"char" to "C",
-			"byte" to "B",
-			"short" to "S",
-			"int" to "I",
-			"float" to "F",
-			"long" to "J",
-			"double" to "D",
-			"void" to "V"
-		)
-		return primitiveMap[name] ?: ("L" + name.replace('.', '/') + ";")
+	private fun getClassNameDesc(name: String): String {
+		return "L" + name.replace('.', '/') + ";"
+	}
+
+	private fun getTypeDesc(type: ArgType): String {
+		return when {
+			type.isPrimitive -> when (type) {
+				ArgType.BOOLEAN -> "Z"
+				ArgType.CHAR -> "C"
+				ArgType.BYTE -> "B"
+				ArgType.SHORT -> "S"
+				ArgType.INT -> "I"
+				ArgType.FLOAT -> "F"
+				ArgType.LONG -> "J"
+				ArgType.DOUBLE -> "D"
+				ArgType.VOID -> "V"
+				else -> throw IllegalArgumentException("Unknown primitive type: $type")
+			}
+
+			type.isObject -> {
+				when {
+					type.isGeneric -> getTypeDesc(ArgType.`object`(type.`object`))
+					type.isGenericType -> getClassNameDesc(Object::class.java.name)
+					else -> getClassNameDesc(type.toString())
+				}
+			}
+
+			type.isArray -> "[" + getTypeDesc(type.arrayElement)
+
+			else -> throw IllegalArgumentException("Unsupported type: $type")
+		}
 	}
 }
