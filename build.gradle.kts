@@ -20,7 +20,7 @@ repositories {
 dependencies {
 	compileOnly("io.github.skylot:jadx-core:1.5.3")
 	implementation("com.highcapable.kavaref:kavaref-core:1.0.2")
-	implementation("com.highcapable.kavaref:kavaref-extension:1.0.1")
+	implementation("com.highcapable.kavaref:kavaref-extension:1.0.2")
 	implementation("org.slf4j:slf4j-api:2.0.17")
 }
 
